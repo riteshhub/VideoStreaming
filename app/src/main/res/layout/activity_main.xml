@@ -1,34 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:id="@+id/mainLayout">
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/startVideo"
+        android:id="@+id/videoInbuilt"
         android:padding="10dp"
-        android:text="Video with Media Controller"
+        android:layout_marginTop="150dp"
+        android:text="Video with Inbuilt Controls"
         android:textSize="15sp"
-        android:layout_centerInParent="true"/>
+        android:layout_centerHorizontal="true"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/startCustomVideo"
+        android:id="@+id/videoCustom"
         android:padding="10dp"
-        android:layout_below="@id/startVideo"
-        android:text="Custom Video Activity"
+        android:layout_below="@id/videoInbuilt"
+        android:text="Video with Custom Controls"
         android:textSize="15sp"
-        android:layout_centerInParent="true"/>
+        android:layout_centerHorizontal="true"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/sampleVideo"
+        android:id="@+id/videoZoom"
         android:padding="10dp"
-        android:layout_below="@id/startCustomVideo"
-        android:text="Sample Video Activity"
+        android:layout_below="@id/videoCustom"
+        android:text="Video with Zoom In/Out"
         android:textSize="15sp"
-        android:layout_centerInParent="true"/>
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/videoTexture"
+    android:padding="10dp"
+    android:layout_below="@id/videoZoom"
+    android:text="Video with TextureView"
+    android:textSize="15sp"
+    android:layout_centerHorizontal="true"/>
 </RelativeLayout>

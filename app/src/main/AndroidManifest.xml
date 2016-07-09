@@ -3,6 +3,7 @@
     package="com.example.constant.videostreaming">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -17,15 +18,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".VideoPlayerActivity"
-            android:screenOrientation="landscape"
+
+        <activity android:name=".VideoZoomActivity"
+            android:configChanges="orientation|screenSize"
             android:theme="@style/VideoTheme" />
 
         <activity android:name=".CustomVideoActivity"
-            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize"
             android:theme="@style/VideoTheme" />
 
         <activity android:name=".SampleVideoRun"
+            android:theme="@style/VideoTheme"
+            android:configChanges="orientation|screenSize"/>
+
+        <activity android:name=".UseTextureVideoView"
             android:theme="@style/VideoTheme"
             android:configChanges="orientation|screenSize"/>
     </application>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".ProximityActivity">
+    <item android:id="@+id/zoom" android:title="@string/zoom"
+        android:icon="@mipmap/ic_zoom_out"
+        android:orderInCategory="100" app:showAsAction="always" />
+
+    <item android:id="@+id/screenshot" android:title="@string/screenshot"
+        android:icon="@mipmap/ic_screenshot"
+        android:orderInCategory="101" app:showAsAction="always" />
+</menu>

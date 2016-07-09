@@ -7,34 +7,41 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.ScaleGestureDetector.OnScaleGestureListener;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.MediaController;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.VideoView;
+
 
 /**
- * Created by Constant on 7/1/2016.
+ * Created by Constant on 7/4/2016.
  */
-public class CustomVideoActivity extends AppCompatActivity implements MediaPlayer.OnPreparedListener, SeekBar.OnSeekBarChangeListener,
-        View.OnClickListener, View.OnTouchListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnInfoListener{
+public class VideoZoomActivity extends AppCompatActivity implements View.OnTouchListener, MediaPlayer.OnPreparedListener, SeekBar.OnSeekBarChangeListener,
+        MediaPlayer.OnCompletionListener, MediaPlayer.OnInfoListener{
 
-    VideoView video;
+    int MIN_WIDTH;
+    private FrameLayout frameLayout;
+    private FrameLayout.LayoutParams mRootParam;
+    VodView video;
+    ScaleGestureDetector mScaleGestureDetector;
+    GestureDetector mGestureDetector;
+    DisplayMetrics dm;
     SeekBar seekBar;
     ImageButton playpause;
-    boolean play = false;
+    boolean play = false, completed=false;
     ProgressBar spinner;
     TextView startTime,endTime;
 
@@ -44,16 +51,14 @@ public class CustomVideoActivity extends AppCompatActivity implements MediaPlaye
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        setContentView(R.layout.activity_custom_video);
+        setContentView(R.layout.activity_video_zoom);
 
         ColorDrawable drawable = new ColorDrawable(Color.argb(100,0,0,0));
         getSupportActionBar().setBackgroundDrawable(drawable);
         getSupportActionBar().setTitle("Big Bunny");
 
-        hideSystemUI();
-        video = (VideoView)findViewById(R.id.videoSurface);
-        //video.setVideoPath("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4");
-        video.setVideoPath("http://rebelutedigital.com/uploads/sam/big_buck_bunny.mp4");
+        video = (VodView)findViewById(R.id.vodView1);
+        video.setVideoPath("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4");
         video.setOnPreparedListener(this);
         video.setOnTouchListener(this);
         video.setOnCompletionListener(this);
@@ -66,11 +71,11 @@ public class CustomVideoActivity extends AppCompatActivity implements MediaPlaye
         spinner.setVisibility(View.INVISIBLE);
 
         playpause = (ImageButton)findViewById(R.id.playpause);
-        playpause.setOnClickListener(this);
+        playpause.setOnTouchListener(this);
 
         startTime = (TextView)findViewById(R.id.startTime);
         endTime = (TextView)findViewById(R.id.endTime);
-
+        hideSystemUI();
     }
 
     @Override
@@ -81,7 +86,8 @@ public class CustomVideoActivity extends AppCompatActivity implements MediaPlaye
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
         {
 
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT)
+        }
+        else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT)
         {
 
         }
@@ -102,7 +108,7 @@ public class CustomVideoActivity extends AppCompatActivity implements MediaPlaye
             spinner.setVisibility(View.VISIBLE);
             seekBar.removeCallbacks(onEverySecond);
             Log.d("Info 2","Buffering");
-            return false;
+            return true;
         }
         else
         {
@@ -113,36 +119,21 @@ public class CustomVideoActivity extends AppCompatActivity implements MediaPlaye
         }
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        // When the window loses focus (e.g. the action overflow is shown),
-        // cancel any pending hide action. When the window gains focus,
-        // hide the system UI.
-        if (hasFocus) {
-            delayedHide(200);
-            //titleVideo.setVisibility(View.VISIBLE);
-
-        } else {
-            mHideHandler.removeMessages(0);
-            //titleVideo.setVisibility(View.GONE);
-            getSupportActionBar().show();
-        }
-    }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
         seekBar.setMax(video.getDuration());
         endTime.setText(video.getDuration()/1000+"");
+       // video.start();
         Log.e("AppXYZ OnPrepared==",video.getDuration()+"");
 
     }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if(fromUser) {
+        if(fromUser ) {
             // this is when actually seekbar has been seeked to a new position
-            Log.e("AppXYZ ProgressChngd==","");
+            Log.d("AppXYZ ProgressChngd==","fds");
             video.seekTo(progress);
         }
     }
@@ -158,45 +149,56 @@ public class CustomVideoActivity extends AppCompatActivity implements MediaPlaye
     }
 
     @Override
-    public void onClick(View v) {
-        if(v.getId()==R.id.playpause)
+    public boolean onTouch(View v, MotionEvent event) {
+        if((v.getId()==R.id.vodView1 || v.getId()==R.id.playpause) && event.getAction()==MotionEvent.ACTION_DOWN && spinner.getVisibility()!=View.VISIBLE)
         {
+
             if(play==false) {
+                if(video.getDuration()<0) {
+                    spinner.setVisibility(View.VISIBLE);
+                    playpause.setVisibility(View.GONE);
+                 }
                 video.start();
-                spinner.setVisibility(View.VISIBLE);
                 playpause.setVisibility(View.GONE);
                 play=true;
-                Log.e("VideoState","Playing");
+                seekBar.postDelayed(onEverySecond, 1000);
+                Log.e("VideoState","Playing"+play);
             }
             else
             {
-                video.start();
-                playpause.setVisibility(View.GONE);
-                playpause.setImageResource(R.mipmap.ic_play);
-                seekBar.postDelayed(onEverySecond, 1000);
-                Log.e("VideoState","Resume");
-            }
-        }
-    }
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        if(v.getId()==R.id.videoSurface && event.getAction()==MotionEvent.ACTION_DOWN)
-        {
-            if(video.isPlaying()) {
                 video.pause();
                 playpause.setVisibility(View.VISIBLE);
                 playpause.setImageResource(R.mipmap.ic_pause);
-                Log.e("VideoState","Pause");
-                //showSystemUI();
+                seekBar.removeCallbacks(onEverySecond);
+                play=false;
+                Log.e("VideoState","Pause"+play);
             }
         }
-        return false;
+        return true;
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
         video.seekTo(0);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        // When the window loses focus (e.g. the action overflow is shown),
+        // cancel any pending hide action. When the window gains focus,
+        // hide the system UI.
+        if (hasFocus) {
+            delayedHide(200);
+            Log.d("hasFOCUS===","");
+            //titleVideo.setVisibility(View.VISIBLE);
+
+        } else {
+            mHideHandler.removeMessages(0);
+            //titleVideo.setVisibility(View.GONE);
+            Log.d("NoFOCUS===","");
+            getSupportActionBar().show();
+        }
     }
 
     private void hideSystemUI() {
@@ -206,6 +208,8 @@ public class CustomVideoActivity extends AppCompatActivity implements MediaPlaye
                 | View.SYSTEM_UI_FLAG_LOW_PROFILE
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         getSupportActionBar().hide();
+        seekBar.setVisibility(View.INVISIBLE);
+
     }
 
     private void showSystemUI() {
